@@ -21,8 +21,8 @@ type Config struct {
 
 type ConfigSignature struct {
 	Name     string `yaml:"name"`
-	Part     string `yaml:"part`
-	Match    string `yaml:"match,omitempty`
+	Part     string `yaml:"part"`
+	Match    string `yaml:"match,omitempty"`
 	Regex    string `yaml:"regex,omitempty"`
 	Verifier string `yaml:"verifier,omitempty"`
 }
@@ -36,9 +36,17 @@ func ParseConfig() (*Config, error) {
 		return config, err
 	}
 
-	err = yaml.Unmarshal([]byte(data), config)
+	err = yaml.Unmarshal(data, config)
 	if err != nil {
 		return config, err
+	}
+
+	for i := 0; i < len(config.GitHubAccessTokens); i++ {
+		config.GitHubAccessTokens[i] = os.ExpandEnv(config.GitHubAccessTokens[i])
+	}
+
+	if len(config.SlackWebhook) > 0 {
+		config.SlackWebhook = os.ExpandEnv(config.SlackWebhook)
 	}
 
 	return config, nil
